@@ -3,7 +3,7 @@ const container = document.getElementById("card-container");
 const loginForm = document.getElementById("loginForm");
 const homePage = document.getElementById("main-homePage");
 const userAvatar = document.getElementById("userAvatar");
-let userEmail = localStorage.getItem("userEmail");
+const userEmail = document.getElementById("userEmail")?.value?.trim();
 
 // Check login state on page load
 LoadAccordingLoggedIn();
@@ -12,20 +12,22 @@ LoadAccordingLoggedIn();
 function handleUserLogin(e) {
   e.preventDefault();
 
-  const userEmail = document.getElementById("userEmail").value.trim();
+  try {
+    if (!userEmail) {
+      alert("Invalid user email!");
+      return;
+    }
 
-  if (!userEmail) {
-    alert("Invalid user email!");
-    return;
+    localStorage.setItem("userEmail", userEmail);
+    localStorage.setItem("isUserLoggedIn", "true");
+
+    loginForm?.classList?.add("d-none");
+    homePage?.classList?.remove("d-none");
+
+    LoadAccordingLoggedIn();
+  } catch (error) {
+    console.log(error);
   }
-
-  localStorage.setItem("userEmail", userEmail);
-  localStorage.setItem("isUserLoggedIn", "true");
-
-  loginForm.classList.add("d-none");
-  homePage.classList.remove("d-none");
-
-  LoadAccordingLoggedIn();
 }
 
 // Load app based on login state
@@ -33,13 +35,15 @@ function LoadAccordingLoggedIn() {
   const isUserLoggedIn = localStorage.getItem("isUserLoggedIn");
 
   if (isUserLoggedIn === "true") {
-    loginForm.classList.add("d-none");
-    homePage.classList.remove("d-none");
+    loginForm?.classList?.add("d-none");
+    homePage?.classList?.remove("d-none");
 
     const userEmail = localStorage.getItem("userEmail");
-    userAvatar.innerText = userEmail?.slice(0, 2).toUpperCase();
+    console.log(userAvatar.innerHTML);
+    
+    // userAvatar.innerText = userEmail?.slice(0, 2).toUpperCase();
 
-    fetch("userData.json")
+    fetch("../json/userData.json")
       .then((res) => res.json())
       .then((data) => {
         userData = data;
@@ -182,7 +186,6 @@ function showUserDetails(uId) {
 `;
 }
 
-
 // Handle logout
 function handleLogout() {
   localStorage.setItem("isUserLoggedIn", "false");
@@ -193,7 +196,7 @@ function handleLogout() {
 
 let preview = document.getElementById("preview");
 preview.addEventListener("click", () => {
-  RedirectTouserDetails("16")
+  RedirectTouserDetails("16");
 });
 
 function openModal() {
@@ -204,12 +207,10 @@ function openModal() {
   let modal_body = document.getElementById("modal_body");
 
   modal_body.innerHTML = `
-  
-
               <div class="d-flex align-items-center justify-content-center">
                       <button
                   type="button"
-                  class=" bg-black text-light rounded-5 p-2 fw-bold"
+                  class=" bg-black text-light rounded-circle p-2 fw-bold"
                 id="editProfileBtn"
                 onclick="Editprofile()"
                 >
@@ -394,13 +395,13 @@ function Editprofile() {
   document.getElementById("modalform").classList.remove("d-none");
 }
 
-  // Handle back/forward browser navigation
-  window.addEventListener("popstate", () => {
-    const match = window.location.pathname.match(/user-details\/(\d+)/);
-    if (match) {
-      const userId = match[1];
-      showUserDetails(userId);
-    } else {
-      renderAllUsers();
-    }
-  });
+// Handle back/forward browser navigation
+window.addEventListener("popstate", () => {
+  const match = window.location.pathname.match(/user-details\/(\d+)/);
+  if (match) {
+    const userId = match[1];
+    showUserDetails(userId);
+  } else {
+    renderAllUsers();
+  }
+});
